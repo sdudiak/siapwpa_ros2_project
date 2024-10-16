@@ -7,7 +7,8 @@ Repozytorium zawiera kod do wykorzystania przez studentów w celu realizacji zaj
 - [Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#container-device-interface-cdi-support)
 - [VS Code devcontainer plugin](https://code.visualstudio.com/docs/devcontainers/containers#_quick-start-open-an-existing-folder-in-a-container)
 
-Uwaga: System operacyjnym Ubuntu jest wymagany ze względu na obsługę GUI (wymaga innego podejścia przy wykorzystaniu Windowsa).
+> [!IMPORTANT]
+System operacyjnym Ubuntu jest wymagany ze względu na obsługę GUI (wymaga innego podejścia przy wykorzystaniu Windowsa).
 
 ## Start
 Otwórz VS Code w katalogu z projektem.
