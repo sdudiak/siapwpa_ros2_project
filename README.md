@@ -76,6 +76,3 @@ W celu sprawdzenia dostępnych `topicow` w nowym oknie terminala uruchom:
 ``` bash
 ros2 topic list
 ```
-
-
-# siapwpa_ros2_project
