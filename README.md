@@ -47,6 +47,13 @@ Uruchomienie przykładowej symulacji:
 gz sim sonoma.sdf
 ```
 
+W przypadku problemów z uruchomieniem Gazebo:
+```bash
+ps -ef | grep "gz sim"
+pkill -f gz
+pkil -f "gz sim"
+```
+
 
 
 ## Cheat Sheet
