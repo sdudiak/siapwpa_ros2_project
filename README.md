@@ -20,9 +20,7 @@ Docker ma preinstalowany [ROS 2 Humble](https://docs.ros.org/en/humble/Tutorials
 ## First step
 Dla osób, które nie miały doczynienia ze środowiskiem ROS 2 + Gazebo, zachęcam do przerobienia tutorialu: [Gazebo Tutorial](https://gazebosim.org/docs/harmonic/tutorials/). Pozwoli to zaznajomić się z tym środowiskiem i tworzyć w przyszłości zaawansowane symulacje.
 
-
 Następnie pomocne będzie odpowiednia kontrola robotami w środowisku symulacyjnym, na dobry start proszę zaznajomić się z repozytorium: [Gazebo ROS 2 Control](https://github.com/ros-controls/gz_ros2_control/).
-
 
 Na sam koniec pewnym podsumowaniem, a także praktycznym podejściem do tematu jest dostarczony od [Husariona](https://husarion.com/tutorials/ros2-tutorials/1-ros2-introduction/) tutorial dla ich kilku robotów.
 
@@ -37,6 +35,46 @@ Na sam koniec pewnym podsumowaniem, a także praktycznym podejściem do tematu j
 > /opt/ros/$ROS_DISTRO/setup.bash
 > /home/developer/ros2_ws/install/setup.bash
 > ```
+
+# ROS 2 -- Getting Started
+
+## ROS2 Examples
+Repozytorium z przykładami dla ROS2 Humble:
+```bash
+git clone https://github.com/ros/ros_tutorials.git -b humble
+```
+
+## Dependencies
+Dobrą praktyką jest sprawdzanie zależności za każdym razem, gdy dodajemy coś do obszaru roboczego.
+Wywołujemy komende z poziomu folderu np. `~/ros2_ws`, który zawiera `/src`
+```bash
+rosdep install -i --from-path src --rosdistro humble -y
+```
+
+W przypadku powodzenia pojawi się komunikat: `#All required rosdeps installed successfully`
+
+## Build the workspace 
+Budowanie obszaru roboczego odbywa się z poziomu foldera `~/ros2_ws`, używając:
+```bash
+colcon build --symlink-install
+```
+Podczas budowania za pomocą `colcon` można wykorzystać następujące flagi ([Więcej informacji](https://colcon.readthedocs.io/en/released/reference/verb/build.html)): 
+
+`--packages-up-to` builds the package you want, plus all its dependencies, but not the whole workspace (saves time).  
+`--symlink-install` saves you from having to rebuild every time you tweak python scripts.  
+`--event-handlers` console_direct+ shows console output while building (can otherwise be found in the log directory).  
+`--executor` sequential processes the packages one by one instead of using parallelism.
+`--merge-install` With this option most of the paths added to environment variables will be the same, resulting in shorter environment variable values. The disadvantage of using this option is that it doesn’t provide proper isolation between packages.  
+
+W celu przetestowania poprawności zbudowania obszaru roboczego można wywołać:
+```bash
+colcon test
+```
+
+Usunięcie folderów `build`, `install`, `log` odbywa się przy użyciu:
+```
+colcon clean workspace
+```
 
 ## Gazebo Harmonic
 
