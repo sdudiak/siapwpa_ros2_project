@@ -10,7 +10,7 @@
 ros2 pkg create --build-type ament_python --node-name my_node my_package
 ```
 
-> [!TIP] Należy zaktualizować poniższe pliki
+> [!TIP] 
 > W pliku `package.xml` należy zawsze dodać wszystkie używane biblioteki, jak w przykładzie poniżej:
 > ```xml
 > <exec_depend>rclpy</exec_depend>  
@@ -130,11 +130,11 @@ if __name__ == '__main__':
 ros2 launch <package_name> <launch_file_name>
 ```
 
-> [!TIP] Namespace in Launch file
-> Unique namespaces allow the system to start two similar nodes without node name or topic name conflicts.
+> [!TIP] 
+> Unique `namespaces` allow the system to start two similar nodes without `node` name or` topic` name conflicts.
 
 > [!NOTE] 
-> For packages with launch files, it is a good idea to add an exec_depend dependency on the `ros2launch` package in your package’s `package.xml`:
+> For packages with `launch` files, it is a good idea to add an `exec_depend` dependency on the `ros2launch` package in your package’s `package.xml`:
 > ```xml 
 > <exec_depend>ros2launch</exec_depend>
 > ```
