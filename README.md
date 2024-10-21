@@ -8,7 +8,7 @@ Repozytorium zawiera kod do wykorzystania przez studentów w celu realizacji zaj
 - [Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#container-device-interface-cdi-support)
 - [VS Code devcontainer plugin](https://code.visualstudio.com/docs/devcontainers/containers#_quick-start-open-an-existing-folder-in-a-container)
 
-> [!IMPORTANT]
+> [!IMPORTANT]  
 > System operacyjnym Ubuntu jest wymagany ze względu na obsługę GUI (wymaga innego podejścia przy wykorzystaniu Windowsa).
 
 ## Start
@@ -27,8 +27,8 @@ Następnie pomocne będzie odpowiednia kontrola robotami w środowisku symulacyj
 
 Na sam koniec pewnym podsumowaniem, a także praktycznym podejściem do tematu jest dostarczony od [Husariona](https://husarion.com/tutorials/ros2-tutorials/1-ros2-introduction/) tutorial dla ich kilku robotów.
 
-> [!IMPORTANT]
-> Należy pamiętać, aby po zbudowaniu wywołać komendę lub pracować w nowym terminalu:
+> [!IMPORTANT] 
+Należy pamiętać, aby po zbudowaniu wywołać komendę lub pracować w nowym terminalu:
 >
 > ```bash
 > source ~/.bashrc
@@ -125,6 +125,7 @@ colcon build --symlink-install
 Podczas budowania za pomocą `colcon` można wykorzystać następujące flagi ([Więcej informacji](https://colcon.readthedocs.io/en/released/reference/verb/build.html)):
 
 `--packages-up-to` builds the package you want, plus all its dependencies, but not the whole workspace (saves time).  
+`--package-select` select the packages with the passed names.
 `--symlink-install` saves you from having to rebuild every time you tweak python scripts.  
 `--event-handlers` console_direct+ shows console output while building (can otherwise be found in the log directory).  
 `--executor` sequential processes the packages one by one instead of using parallelism.  
@@ -193,3 +194,4 @@ ros2 launch <package_name> <launch_file_name>
 - [URDF Tutorial](https://github.com/ros/urdf_tutorial)
 - [ROS2 + Gazebo](https://docs.ros.org/en/humble/Tutorials/Advanced/Simulators/Gazebo/Gazebo.html)
 - [Gazebo YT](https://www.youtube.com/watch?v=DsjJtC8QTQY&ab_channel=TheConstruct)
+- [ROS Gazebo Project Template](https://github.com/gazebosim/ros_gz_project_template)

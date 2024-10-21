@@ -46,9 +46,11 @@ RUN pip3 install \
 # Install Gazebo Harmonic
 RUN curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
-RUN apt-get update -y && apt-get install -y gz-harmonic
+RUN apt-get update -y
+RUN apt-get install -y ros-humble-ros-gzharmonic
+# RUN apt install -y ros-humble-ros-gz
 RUN apt install -y ros-humble-turtle-tf2-py ros-humble-tf2-tools
-RUN apt-get install -y ros-humble-ros-ign-bridge
+# RUN apt-get install -y ros-humble-ros-ign-bridge
 
 
 RUN useradd -rm -d /home/developer -s /bin/bash -g root -G sudo -u 1001 developer && \

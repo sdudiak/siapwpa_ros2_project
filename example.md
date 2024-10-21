@@ -141,6 +141,17 @@ ros2 launch <package_name> <launch_file_name>
 > ```xml
 > <exec_depend>ros2launch</exec_depend>
 > ```
+> ```python
+> setup(
+>    # Other parameters ...
+>    data_files=[
+>        # ... Other data files
+>        # Include all launch files.
+>        (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*')))
+>    ]
+>)
+
+
 
 ```python
 import os
