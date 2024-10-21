@@ -1,37 +1,40 @@
 # Example of ROS2 packages in Python
 
-* `package.xml` file containing meta information about the package  
-* `resource/<package_name>` marker file for the package  
-* `setup.cfg` is required when a package has executables, so `ros2 run` can find them  
-* `setup.py` containing instructions for how to install the package  
-* `<package_name>` - a directory with the same name as your package, used by ROS 2 tools to find your package, contains `__init__.py`
+- `package.xml` file containing meta information about the package
+- `resource/<package_name>` marker file for the package
+- `setup.cfg` is required when a package has executables, so `ros2 run` can find them
+- `setup.py` containing instructions for how to install the package
+- `<package_name>` - a directory with the same name as your package, used by ROS 2 tools to find your package, contains `__init__.py`
 
 ```bash
 ros2 pkg create --build-type ament_python --node-name my_node my_package
 ```
 
-> [!TIP] 
+> [!TIP]
 > W pliku `package.xml` należy zawsze dodać wszystkie używane biblioteki, jak w przykładzie poniżej:
+>
 > ```xml
-> <exec_depend>rclpy</exec_depend>  
+> <exec_depend>rclpy</exec_depend>
 > <exec_depend>std_msgs</exec_depend>
 > ```
 >
 > W pliku `setup.py` należy dodać:
+>
 > ```python
 > entry_points={
 >        'console_scripts': [
 >                '<name_run> = <package_name>.<file_name>:<function_name>',
 >        ],
->},
+> },
 > ```
 >
 > W pliku `setup.cfg` sprawdzić czy są poprawne dane, jak poniżej:
+>
 > ```properties
 > [develop]
->script_dir=$base/lib/<package_name>
->[install]
->install_scripts=$base/lib/<package_name>
+> script_dir=$base/lib/<package_name>
+> [install]
+> install_scripts=$base/lib/<package_name>
 > ```
 
 ## How to create simple publisher
@@ -64,7 +67,7 @@ def main(args=None):
 
     try:
       rclpy.spin(minimal_publisher)
-    except KeyboardInterrupt: 
+    except KeyboardInterrupt:
       pass
     finally:
       # Destroy the node explicitly
@@ -78,9 +81,8 @@ if __name__ == '__main__':
     main()
 ```
 
-
-
 ## How to create simple subscriber
+
 ```python
 import rclpy
 from rclpy.node import Node
@@ -110,7 +112,7 @@ def main(args=None):
 
     try:
       rclpy.spin(minimal_subscriber)
-    except KeyboardInterrupt: 
+    except KeyboardInterrupt:
       pass
     finally:
       # Destroy the node explicitly
@@ -121,7 +123,7 @@ def main(args=None):
 
 
 if __name__ == '__main__':
-    main() 
+    main()
 ```
 
 ## How to create launch file [More info](https://docs.ros.org/en/humble/Tutorials/Intermediate/Launch/Creating-Launch-Files.html)
@@ -130,12 +132,13 @@ if __name__ == '__main__':
 ros2 launch <package_name> <launch_file_name>
 ```
 
-> [!TIP] 
-> Unique `namespaces` allow the system to start two similar nodes without `node` name or` topic` name conflicts.
+> [!TIP]
+> Unique `namespaces` allow the system to start two similar nodes without `node` name or `topic` name conflicts.
 
-> [!NOTE] 
+> [!NOTE]
 > For packages with `launch` files, it is a good idea to add an `exec_depend` dependency on the `ros2launch` package in your package’s `package.xml`:
-> ```xml 
+>
+> ```xml
 > <exec_depend>ros2launch</exec_depend>
 > ```
 
