@@ -83,7 +83,7 @@ ros2 run ros_gz_bridge parameter_bridge /TOPIC@ROS_MSG@GZ_MSG
 
 For example:
 
-```bash
+```
 ros2 run ros_gz_bridge parameter_bridge /scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan
 ```
 
@@ -100,12 +100,12 @@ explaining how to make communication connections from ROS to Gazebo and vice ver
 
 It is also possible to use ROS Launch with the `ros_gz_bridge` and represent the topics in yaml format to be given to the bridge at launch time.
 
-```
-- ros_topic_name: "scan"
-  gz_topic_name: "/scan"
-  ros_type_name: "sensor_msgs/msg/LaserScan"
-  gz_type_name: "gz.msgs.LaserScan"
-  direction: GZ_TO_ROS  # BIDIRECTIONAL or ROS_TO_GZ
+```yaml
+ros_topic_name: "scan"
+gz_topic_name: "/scan"
+ros_type_name: "sensor_msgs/msg/LaserScan"
+gz_type_name: "gz.msgs.LaserScan"
+direction: GZ_TO_ROS  # BIDIRECTIONAL or ROS_TO_GZ
 ```
 
 The configuration file is a YAML file that contains the mapping between the ROS
@@ -182,14 +182,14 @@ Gazebo Sim, that will be converted into ROS images, and visualized with
 
 First we start Gazebo Sim (don't forget to hit play, or Gazebo Sim won't generate any images).
 
-```
+```bash
 # Shell A:
 gz sim sensors_demo.sdf
 ```
 
 Let's see the topic where camera images are published.
 
-```
+```bash
 # Shell B:
 gz topic -l | grep image
 /rgbd_camera/depth_image
@@ -198,7 +198,7 @@ gz topic -l | grep image
 
 Then we start the parameter bridge with the previous topic.
 
-```
+```bash
 # Shell B:
 . ~/bridge_ws/install/setup.bash
 ros2 run ros_gz_bridge parameter_bridge /rgbd_camera/image@sensor_msgs/msg/Image@gz.msgs.Image
@@ -206,7 +206,7 @@ ros2 run ros_gz_bridge parameter_bridge /rgbd_camera/image@sensor_msgs/msg/Image
 
 Now we start the ROS GUI:
 
-```
+```bash
 # Shell C:
 . /opt/ros/rolling/setup.bash
 ros2 run rqt_image_view rqt_image_view /rgbd_camera/image

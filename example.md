@@ -1,4 +1,4 @@
-# Example of ROS2 packages in Python
+# Example of ROS 2 packages in Python
 
 - `package.xml` file containing meta information about the package
 - `resource/<package_name>` marker file for the package
