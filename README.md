@@ -44,7 +44,6 @@ Należy pamiętać, aby po zbudowaniu wywołać komendę lub pracować w nowym t
 ## Example
 1. Zbuduj obszar roboczy wraz z simple_example package.  
 2. Uruchom launcha `example.launch.py`, pokazujący, w jaki sposób należy połączyć Gazebo z ROS 2, aby możliwa była wzajemna komunikacja.
-3. 
 
 
 ## Resources

@@ -50,6 +50,8 @@ RUN apt-get update -y
 RUN apt-get install -y ros-humble-ros-gzharmonic
 RUN apt install -y ros-humble-turtle-tf2-py ros-humble-tf2-tools
 
+RUN apt-get update -y
+RUN apt-get upgrade -y
 
 RUN useradd -rm -d /home/developer -s /bin/bash -g root -G sudo -u 1001 developer && \
     echo 'developer:developer' | chpasswd && \
