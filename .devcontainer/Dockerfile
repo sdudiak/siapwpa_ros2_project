@@ -6,45 +6,44 @@ ENV RCUTILS_COLORIZED_OUTPUT=1
 
 RUN apt update && \
     apt install -y \
-        build-essential \
-        cmake \
-        git \
-        curl lsb-release gnupg \
-        libbullet-dev \
-        python3-colcon-common-extensions \
-        python3-flake8 \
-        python3-pip \
-        python3-pytest-cov \
-        python3-rosdep \
-        python3-setuptools \
-        python3-vcstool \
-        python3-colcon-clean \
-        wget \
-        clang-format && \
+    build-essential \
+    cmake \
+    git \
+    curl lsb-release gnupg \
+    libbullet-dev \
+    python3-colcon-common-extensions \
+    python3-flake8 \
+    python3-pip \
+    python3-pytest-cov \
+    python3-rosdep \
+    python3-setuptools \
+    python3-vcstool \
+    python3-colcon-clean \
+    wget \
+    clang-format && \
     python3 -m pip install -U \
-        argcomplete \
-        flake8-blind-except \
-        flake8-builtins \
-        flake8-class-newline \
-        flake8-comprehensions \
-        flake8-deprecated \
-        flake8-docstrings \
-        flake8-import-order \
-        flake8-quotes \
-        pytest-repeat \
-        pytest-rerunfailures \
-        pytest
+    argcomplete \
+    flake8-blind-except \
+    flake8-builtins \
+    flake8-class-newline \
+    flake8-comprehensions \
+    flake8-deprecated \
+    flake8-docstrings \
+    flake8-import-order \
+    flake8-quotes \
+    pytest-repeat \
+    pytest-rerunfailures \
+    pytest
 
 RUN pip3 install \
     kconfiglib \
     jsonschema \
     jinja2 \
     pyros-genmsg \
-    future 
-
-
-# Install Gazebo Harmonic - Default Gazebo version in ROS2 Humble is Fortress
-RUN curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+    future \
+    opencv-python \
+    # Install Gazebo Harmonic - Default Gazebo version in ROS2 Humble is Fortress
+    RUN curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
 RUN apt-get update -y
 RUN apt-get install -y ros-humble-ros-gzharmonic

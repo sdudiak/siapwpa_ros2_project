@@ -14,6 +14,8 @@ setup(
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
         (os.path.join('share', package_name, 'models/vehicle'), glob(os.path.join('models/vehicle', '*'))),
         (os.path.join('share', package_name, 'worlds'), glob(os.path.join('worlds', '*'))),
+        (os.path.join('share', package_name, 'config'), glob(os.path.join('config', '*'))),
+
 
     ],
     install_requires=['setuptools'],
@@ -25,7 +27,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'ros_gazebo_ex = simple_example.simple_example_node:main'
+            'ros_gazebo_ex = simple_example.simple_example_node:main',
+            'track_controller = simple_example.track_controller_node:main'
+
         ],
     },
 )
