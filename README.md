@@ -7,6 +7,12 @@ cd ~/ros2_ws
 colcon build
 ```
 
+Build once (after this command, Python changes will work without rebuilding)
+```
+cd ~/ros2_ws
+colcon build --symlink-install
+```
+
 Run the simulation + rviz + bridge setup
 
 ```
