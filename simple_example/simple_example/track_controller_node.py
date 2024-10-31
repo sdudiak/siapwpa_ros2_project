@@ -95,6 +95,9 @@ class TrackController(Node):
       return masked_image
 
     def processImage(self, img: np.ndarray) -> Twist:
+      """
+      Process the input image and output command velocity
+      """
       height, width,_ = img.shape
       region_of_interest_vertices = [
         (width * 0.1, height * 0.47),
