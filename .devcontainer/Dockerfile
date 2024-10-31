@@ -41,9 +41,9 @@ RUN pip3 install \
     jinja2 \
     pyros-genmsg \
     future \
-    opencv-python \
-    # Install Gazebo Harmonic - Default Gazebo version in ROS2 Humble is Fortress
-    RUN curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+    opencv-python 
+# Install Gazebo Harmonic - Default Gazebo version in ROS2 Humble is Fortress
+RUN curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
 RUN apt-get update -y
 RUN apt-get install -y ros-humble-ros-gzharmonic

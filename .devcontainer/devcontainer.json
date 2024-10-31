@@ -5,9 +5,12 @@
 	"initializeCommand": "xhost +local:docker",
 	// "onCreateCommand": "/bin/bash /home/developer/ros2_ws/setup.sh",
 	"service": "workspace",
+	"update": "none",
 	"workspaceFolder": "/home/developer/ros2_ws/src",
 	"shutdownAction": "stopCompose",
 	// Set *default* container specific settings.json values on container create.
+	"mounts": [
+		"source=../,target=/home/developer/ros2_ws/src,type=bind,consistency=cached"],
 	"customizations": {
 		"vscode": {
 			"settings": {
