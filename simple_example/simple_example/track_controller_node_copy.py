@@ -43,8 +43,6 @@ class TrackController(Node):
         self._display_thread = threading.Thread(target=self.display_image, daemon=True)
         self._display_thread.start()
 
-        self._last_angular_z = 0.0  # Initialize last angular velocity for smoothing
-
     def imageDataCb(self, msg: Image) -> None:
         """Converts incoming Image message to an OpenCV image."""
         try:
@@ -116,49 +114,41 @@ class TrackController(Node):
         cv2.rectangle(line_frame, (0, rect_top), (width, rect_bottom), (255, 0, 0), 2)
 
         if lines is not None:
-            # Find the x-positions of the detected lines
-            left_xs = []
-            right_xs = []
+            # Find the leftmost and rightmost line positions
+            left_x = float('inf')
+            right_x = float('-inf')
 
             for line in lines:
                 for x1, y1, x2, y2 in line:
-                    # Determine leftmost and rightmost points
-                    if x1 < width // 2:
-                        left_xs.append(x1)
-                        left_xs.append(x2)
-                    else:
-                        right_xs.append(x1)
-                        right_xs.append(x2)
-
-            # Calculate the average x-coordinates for left and right lines
-            left_x = np.mean(left_xs) if left_xs else float('inf')
-            right_x = np.mean(right_xs) if right_xs else float('-inf')
+                    left_x = min(left_x, x1, x2)
+                    right_x = max(right_x, x1, x2)
 
             if left_x < float('inf') and right_x > float('-inf'):
-                # Calculate the midpoint between the leftmost and rightmost line positions
+                # Calculate the midpoint
                 cx_full = (left_x + right_x) // 2
                 cy_full = (rect_top + rect_bottom) // 2
 
                 # Draw the centroid and detected line area
-                cv2.circle(line_frame, (int(cx_full), int(cy_full)), 5, (0, 255, 0), -1)  # Center point
-                cv2.line(line_frame, (int(left_x), rect_top), (int(left_x), rect_bottom), (255, 0, 255), 2)  # Left reference
-                cv2.line(line_frame, (int(right_x), rect_top), (int(right_x), rect_bottom), (255, 0, 255), 2)  # Right reference
+                cv2.circle(line_frame, (cx_full, cy_full), 5, (0, 255, 0), -1)
                 line_frame[rect_top:rect_bottom, :][binary_mask > 0] = (0, 255, 255)
 
                 # Calculate deviation and set linear velocity
                 deviation = cx_full - (width / 2)
 
                 # Adjust linear speed based on deviation
-                max_linear_speed = 3.0
-                min_linear_speed = 0.5
+                max_linear_speed = 10.0
+                min_linear_speed = 5.0
                 output_cmd_vel.linear.x = max(min_linear_speed, max_linear_speed - abs(deviation) / (width / 2) * (max_linear_speed - min_linear_speed))
 
                 # Adjust angular control based on deviation
-                angular_coefficient = -0.01  # Adjust this value to increase/decrease responsiveness
+                angular_coefficient = -0.01  # Lower this value for a smoother turn
                 target_angular_z = angular_coefficient * deviation
 
                 # Smoothing transition of angular velocity
-                output_cmd_vel.angular.z = 0.5 * self._last_angular_z + 0.5 * target_angular_z  # More responsive
+                if hasattr(self, '_last_angular_z'):
+                    output_cmd_vel.angular.z = 0.8 * self._last_angular_z + 0.2 * target_angular_z
+                else:
+                    output_cmd_vel.angular.z = target_angular_z  # First time setting
 
                 self._last_angular_z = output_cmd_vel.angular.z
 
@@ -177,6 +167,8 @@ class TrackController(Node):
             output_cmd_vel.angular.z = 0.0
 
         return output_cmd_vel, line_frame
+
+
 
 
 def main(args=None):
