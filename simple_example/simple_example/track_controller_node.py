@@ -8,7 +8,6 @@ from cv_bridge import CvBridge
 import cv2
 import numpy as np
 import threading
-import time
 
 class TrackController(Node):
     def __init__(self):
@@ -24,7 +23,7 @@ class TrackController(Node):
         self._cmd_vel_publisher = self.create_publisher(Twist, "/cmd_vel", 10)
 
         # Timers for publishing and processing rates
-        self._cmd_vel_publish_rate = 10.0
+        self._cmd_vel_publish_rate = 40.0
         self._cmd_vel_publisher_timer = self.create_timer(
             1 / self._cmd_vel_publish_rate, self.publishCmdVelCb, callback_group=self._reentrant_cb_group)
         
@@ -45,11 +44,6 @@ class TrackController(Node):
 
         # Hold the last known command velocities
         self._last_cmd_vel = Twist()
-        self._no_line_counter = 0  # Counter for how long no line has been detected
-        self._turn_start_time = None  # Time when turning started
-        self._turn_duration = 10.0  # Duration of turn in seconds
-        self._turning_left = False
-        self._turning_right = False
 
     def imageDataCb(self, msg: Image) -> None:
         try:
@@ -79,9 +73,13 @@ class TrackController(Node):
     def processImage(self, img: np.ndarray) -> tuple:
         height, width, _ = img.shape
 
+        # Define maximum linear speed
+        max_linear_speed = 8.0
+        min_linear_speed = 0.5  
+
         # Define rectangular region for line detection
         rect_height = 90
-        rect_top = height // 2 - rect_height // 2 + 80
+        rect_top = height // 2 - rect_height // 2 +80
         rect_bottom = rect_top + rect_height
 
         # Extract region of interest
@@ -136,51 +134,25 @@ class TrackController(Node):
                 cv2.line(line_frame, (int(right_x), rect_top), (int(right_x), rect_bottom), (255, 0, 255), 2)
                 line_frame[rect_top:rect_bottom, :][binary_mask > 0] = (0, 255, 255)
 
-                max_linear_speed = 10.0
-                min_linear_speed = 0.2
                 deviation = cx_full - (width / 2)
-                output_cmd_vel.linear.x = max(min_linear_speed, max_linear_speed - abs(deviation) / (width / 2) * (max_linear_speed - min_linear_speed))
-                output_cmd_vel.angular.z = -deviation / (width / 2) * 3  # Increased responsiveness
+                angular_speed_factor = 10.0  
+                self._last_cmd_vel.angular.z = -deviation / (width / 2) * angular_speed_factor
 
-                # Reset no-line counter
-                self._no_line_counter = 0
+                output_cmd_vel.linear.x = max(min_linear_speed, max_linear_speed)
+                output_cmd_vel.angular.z = max(-10.0, min(10.0, self._last_cmd_vel.angular.z))  # Limit angular speed to ±10.0
 
                 # Display information on screen
                 cv2.putText(line_frame, f"Deviation: {deviation:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
                 cv2.putText(line_frame, f"Linear Speed: {output_cmd_vel.linear.x:.2f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
                 cv2.putText(line_frame, f"Angular Speed: {output_cmd_vel.angular.z:.2f}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
 
-                # Reset turn flags
-                self._turning_left = False
-                self._turning_right = False
-
             else:
-                # Line lost
-                if not self._turning_left and not self._turning_right:
-                    if left_x == float('inf'):
-                        # Turn left
-                        self._turning_left = True
-                        self._turn_start_time = time.time()
-                    else:
-                        # Turn right
-                        self._turning_right = True
-                        self._turn_start_time = time.time()
-
-                # Check if turning
-                if self._turning_left and time.time() - self._turn_start_time < self._turn_duration:
-                    output_cmd_vel.linear.x = 10.0  # Maintain linear speed
-                    output_cmd_vel.angular.z = 1.5  # Turn left
-                elif self._turning_right and time.time() - self._turn_start_time < self._turn_duration:
-                    output_cmd_vel.linear.x = 10.0  # Maintain linear speed
-                    output_cmd_vel.angular.z = -1.5 # Turn right
-                else:
-                    # End turn
-                    self._turning_left = False
-                    self._turning_right = False
-                    output_cmd_vel.linear.x = 10.0
-                    output_cmd_vel.angular.z = 0.0
+                # Line lost; maintain linear speed
+                output_cmd_vel.linear.x = max_linear_speed
+                output_cmd_vel.angular.z = 0.0
 
         return output_cmd_vel, line_frame
+
 
 
 def main(args=None):
