@@ -32,8 +32,8 @@ class TrackController(Node):
             1 / self._image_processing_rate, self.processImageCb, callback_group=self._mutex_cb_group)
 
         # Class fields for image and command storage
-        self._current_frame = np.zeros((100, 100, 3), dtype=np.uint8)
-        self._line_frame = np.zeros((100, 100, 3), dtype=np.uint8)
+        self._current_frame = np.zeros((1920, 1080, 3), dtype=np.uint8)
+        self._line_frame = np.zeros((1920, 1080, 3), dtype=np.uint8)
 
         self._current_cmd_vel = Twist()
         self._cv_bridge = CvBridge()
@@ -44,6 +44,9 @@ class TrackController(Node):
 
         # Hold the last known command velocities
         self._last_cmd_vel = Twist()
+
+        self.max_linear_speed = 1.0
+        self.min_linear_speed = 0.5
 
     def imageDataCb(self, msg: Image) -> None:
         try:
@@ -70,89 +73,128 @@ class TrackController(Node):
                 break
         cv2.destroyAllWindows()
 
+    # def processImage(self, img: np.ndarray) -> tuple:
+    #     height, width, _ = img.shape
+
+    #     # Define rectangular region for line detection
+    #     rect_height = 90
+    #     rect_top = height // 2 - rect_height // 2 +80
+    #     rect_bottom = rect_top + rect_height
+
+    #     # Extract region of interest
+    #     rect_img = img[rect_top:rect_bottom, 0:width]
+
+    #     # Blur
+    #     rect_img = cv2.GaussianBlur(rect_img, (5, 5), 0)
+
+    #     # Convert to HSV and color filter
+    #     hsv = cv2.cvtColor(rect_img, cv2.COLOR_BGR2HSV)
+    #     lower_yellow = np.array([10, 25, 25])
+    #     upper_yellow = np.array([30, 255, 255])
+    #     binary_mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+
+    #     # Clean the mask
+    #     kernel = np.ones((5, 5), np.uint8)
+    #     binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel)
+    #     binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_OPEN, kernel)
+
+    #     # Detect lines
+    #     lines = cv2.HoughLinesP(binary_mask, 1, np.pi / 180, threshold=30, minLineLength=20, maxLineGap=5)
+
+    #     line_frame = img.copy()
+    #     output_cmd_vel = Twist()
+
+    #     # Draw rectangle
+    #     cv2.rectangle(line_frame, (0, rect_top), (width, rect_bottom), (255, 0, 0), 2)
+
+    #     # Initialize left and right positions
+    #     left_xs = []
+    #     right_xs = []
+
+    #     if lines is not None:
+    #         self.get_logger().info(f"Number of lines: {len(lines)}")
+    #         for line in lines:
+    #             for x1, y1, x2, y2 in line:
+    #                 if x1 < width // 2:
+    #                     left_xs.append(x1)
+    #                     left_xs.append(x2)
+    #                 else:
+    #                     right_xs.append(x1)
+    #                     right_xs.append(x2)
+
+    #         left_x = np.mean(left_xs) if left_xs else float('inf')
+    #         right_x = np.mean(right_xs) if right_xs else float('-inf')
+
+    #         if left_x < float('inf') and right_x > float('-inf'):
+    #             cx_full = (left_x + right_x) // 2
+    #             cy_full = (rect_top + rect_bottom) // 2
+
+    #             cv2.circle(line_frame, (int(cx_full), int(cy_full)), 5, (0, 255, 0), -1)
+    #             cv2.line(line_frame, (int(left_x), rect_top), (int(left_x), rect_bottom), (255, 0, 255), 2)
+    #             cv2.line(line_frame, (int(right_x), rect_top), (int(right_x), rect_bottom), (255, 0, 255), 2)
+    #             line_frame[rect_top:rect_bottom, :][binary_mask > 0] = (0, 255, 255)
+
+    #             deviation = cx_full - (width / 2)
+    #             angular_speed_factor = 10.0  
+    #             self._last_cmd_vel.angular.z = -deviation / (width / 2) * angular_speed_factor
+
+    #             output_cmd_vel.linear.x = max(self.min_linear_speed, self.max_linear_speed)
+    #             output_cmd_vel.angular.z = max(-10.0, min(10.0, self._last_cmd_vel.angular.z))  # Limit angular speed to ±10.0
+
+    #             # Display information on screen
+    #             cv2.putText(line_frame, f"Deviation: {deviation:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+    #             cv2.putText(line_frame, f"Linear Speed: {output_cmd_vel.linear.x:.2f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+    #             cv2.putText(line_frame, f"Angular Speed: {output_cmd_vel.angular.z:.2f}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+
+    #         else:
+    #             # Line lost; maintain linear speed
+    #             output_cmd_vel.linear.x = self.max_linear_speed
+    #             output_cmd_vel.angular.z = 0.0
+
+    #     return output_cmd_vel, line_frame
     def processImage(self, img: np.ndarray) -> tuple:
         height, width, _ = img.shape
 
-        # Define maximum linear speed
-        max_linear_speed = 8.0
-        min_linear_speed = 0.5  
+        gaussian = cv2.GaussianBlur(img, (5, 5), 0)
 
-        # Define rectangular region for line detection
-        rect_height = 90
-        rect_top = height // 2 - rect_height // 2 +80
-        rect_bottom = rect_top + rect_height
+        hsv = cv2.cvtColor(gaussian, cv2.COLOR_BGR2HSV)
 
-        # Extract region of interest
-        rect_img = img[rect_top:rect_bottom, 0:width]
+        lower_yellow = np.array([28, 80, 30])
+        upper_yellow = np.array([30, 255, 110])
 
-        # Blur
-        rect_img = cv2.GaussianBlur(rect_img, (5, 5), 0)
+        yellow_mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
 
-        # Convert to HSV and color filter
-        hsv = cv2.cvtColor(rect_img, cv2.COLOR_BGR2HSV)
-        lower_yellow = np.array([10, 25, 25])
-        upper_yellow = np.array([30, 255, 255])
-        binary_mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+        kernel = np.ones((15, 15), np.uint8)
+        yellow_mask = cv2.morphologyEx(yellow_mask, cv2.MORPH_CLOSE, kernel)
+        kernel = np.ones((3, 3), np.uint8)
+        yellow_mask = cv2.morphologyEx(yellow_mask, cv2.MORPH_OPEN, kernel)
 
-        # Clean the mask
-        kernel = np.ones((5, 5), np.uint8)
-        binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_CLOSE, kernel)
-        binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_OPEN, kernel)
-
-        # Detect lines
-        lines = cv2.HoughLinesP(binary_mask, 1, np.pi / 180, threshold=30, minLineLength=20, maxLineGap=5)
+        contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         line_frame = img.copy()
         output_cmd_vel = Twist()
 
-        # Draw rectangle
-        cv2.rectangle(line_frame, (0, rect_top), (width, rect_bottom), (255, 0, 0), 2)
+        for i, contour in enumerate(contours):
+            area = cv2.contourArea(contour)
+            if area > 1000:
+                max_x, max_y = np.max(contour[0], axis=0)
+                min_x, min_y = np.min(contour[0], axis=0)
 
-        # Initialize left and right positions
-        left_xs = []
-        right_xs = []
+                cv2.line(line_frame, (min_x, min_y), (max_x, max_y), (255, 0, 0), 5)
+                # M = cv2.moments(contour)
+                # if M['m00'] != 0:
+                #     cx = int(M['m10'] / M['m00'])
+                #     cy = int(M['m01'] / M['m00'])
+                # else:
+                #     cx, cy = 0, 0
 
-        if lines is not None:
-            for line in lines:
-                for x1, y1, x2, y2 in line:
-                    if x1 < width // 2:
-                        left_xs.append(x1)
-                        left_xs.append(x2)
-                    else:
-                        right_xs.append(x1)
-                        right_xs.append(x2)
+                # print(f"Contour {i + 1}: Area = {area} pixels, Centroid = ({cx}, {cy})")
 
-            left_x = np.mean(left_xs) if left_xs else float('inf')
-            right_x = np.mean(right_xs) if right_xs else float('-inf')
+                # cv2.circle(line_frame, (cx, cy), 5, (255, 0, 0), -1)
 
-            if left_x < float('inf') and right_x > float('-inf'):
-                cx_full = (left_x + right_x) // 2
-                cy_full = (rect_top + rect_bottom) // 2
 
-                cv2.circle(line_frame, (int(cx_full), int(cy_full)), 5, (0, 255, 0), -1)
-                cv2.line(line_frame, (int(left_x), rect_top), (int(left_x), rect_bottom), (255, 0, 255), 2)
-                cv2.line(line_frame, (int(right_x), rect_top), (int(right_x), rect_bottom), (255, 0, 255), 2)
-                line_frame[rect_top:rect_bottom, :][binary_mask > 0] = (0, 255, 255)
-
-                deviation = cx_full - (width / 2)
-                angular_speed_factor = 10.0  
-                self._last_cmd_vel.angular.z = -deviation / (width / 2) * angular_speed_factor
-
-                output_cmd_vel.linear.x = max(min_linear_speed, max_linear_speed)
-                output_cmd_vel.angular.z = max(-10.0, min(10.0, self._last_cmd_vel.angular.z))  # Limit angular speed to ±10.0
-
-                # Display information on screen
-                cv2.putText(line_frame, f"Deviation: {deviation:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-                cv2.putText(line_frame, f"Linear Speed: {output_cmd_vel.linear.x:.2f}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-                cv2.putText(line_frame, f"Angular Speed: {output_cmd_vel.angular.z:.2f}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-
-            else:
-                # Line lost; maintain linear speed
-                output_cmd_vel.linear.x = max_linear_speed
-                output_cmd_vel.angular.z = 0.0
 
         return output_cmd_vel, line_frame
-
 
 
 def main(args=None):
