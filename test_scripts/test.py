@@ -1,36 +1,59 @@
 import cv2
 import numpy as np
-from skimage.morphology import skeletonize
+import matplotlib.pyplot as plt
 
-im = cv2.imread("src/test_scripts/test.png")
+# img = cv2.imread("src/test_scripts/test.png")
+img = cv2.imread("src/test_scripts/test1.png")
 
-gaussian = cv2.GaussianBlur(im, (5, 5), 0)
+# src = np.float32([
+#     [665, 550], 
+#     [1160, 550],
+#     [0, 755], 
+#     [1920, 755]
+#     ])
 
-hsv = cv2.cvtColor(gaussian, cv2.COLOR_BGR2HSV)
+# dst = np.float32([
+#     [0, 1080],
+#     [1920, 1080],
+#     [0, 0],
+#     [1920, 0]
+#     ])
 
-lower_yellow = np.array([28, 80, 30])
-upper_yellow = np.array([30, 255, 110])
+src = np.float32([
+    [520, 560], 
+    [1300, 560],
+    [0, 840], 
+    [1920, 840]
+    ])
 
-yellow_mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+dst = np.float32([
+    [0, 0],
+    [1920, 0],
+    [0, 1080],
+    [1920, 1080]
+    ])
+    
+img_size = (img.shape[1], img.shape[0])
 
-kernel = np.ones((15, 15), np.uint8)
-yellow_mask = cv2.morphologyEx(yellow_mask, cv2.MORPH_CLOSE, kernel)
-kernel = np.ones((3, 3), np.uint8)
-yellow_mask = cv2.morphologyEx(yellow_mask, cv2.MORPH_OPEN, kernel)
+matrix = cv2.getPerspectiveTransform(src, dst)
 
-skeletonize(yellow_mask)
+birdseye = cv2.warpPerspective(img, matrix, img_size)
 
+birdseye_rgb = cv2.cvtColor(birdseye, cv2.COLOR_BGR2RGB)
 
-# contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+hsv = cv2.cvtColor(birdseye_rgb, cv2.COLOR_BGR2HSV)
+print(type(hsv))
+lower_yellow = np.array([88, 120, 41])
+upper_yellow = np.array([95, 255, 55])
+binary_mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
 
-# for i, contour in enumerate(contours):
-#     area = cv2.contourArea(contour)
-#     if area > 1000:
-       
+print(np.where(binary_mask != 0))
 
+kernel = np.ones((11, 11), np.uint8)
+binary_mask = cv2.dilate(binary_mask, kernel, iterations=2)
 
-while True:
-  cv2.imshow('Image', im)
-  cv2.imshow('Yellow', yellow_mask)
-  if cv2.waitKey(1) & 0xFF == ord('q'):
-      break
+# plt.imshow(hsv)
+plt.imshow(binary_mask, cmap='gray')
+# plt.imshow(img)
+plt.axis('off')
+plt.show()
